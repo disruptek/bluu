@@ -1,8 +1,10 @@
-version = "0.0.5"
+version = "0.0.6"
 author = "disruptek"
 description = "Microsoft Azure Cloud Computing Platform and Services (MAC) APIs"
 license = "MIT"
 requires "nim >= 0.20.0"
 requires "https://github.com/disruptek/rest.git >= 1.0.0"
+requires "https://github.com/disruptek/openapi.git >= 3.1.3"
+requires "npeg >= 0.22.2"
 
 srcDir = "src"
